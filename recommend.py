@@ -20,8 +20,8 @@ class Store(BaseModel):
     cleanliness: int
 
 class RecommendRequest(BaseModel):
-    prefer_type: str
-    prefer_categories: str
+    preferType: str
+    preferCategories: str
     storelist: List[Store]
 
 class RecommendResponse(BaseModel):
