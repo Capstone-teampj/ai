@@ -37,13 +37,13 @@ def recommend_stores(request: RecommendRequest):
     # 1. 데이터 전처리
     try:
         store_data = pd.DataFrame([store.dict() for store in request.storelist])
-        filtered_stores = store_data[store_data['storeType'] == request.prefer_type]
+        filtered_stores = store_data[store_data['storeType'] == request.preferType]
 
         if filtered_stores.empty:
             raise HTTPException(status_code=404, detail="선호하는 매장 유형이 없습니다.")
 
         # 2. Surprise 데이터셋 준비
-        chosen_metric = request.prefer_categories
+        chosen_metric = request.preferCategories
         if chosen_metric not in ["ratingscore", "taste", "service", "interior", "cleanliness"]:
             raise HTTPException(status_code=400, detail=f"잘못된 평가 항목: {chosen_metric}")
 
