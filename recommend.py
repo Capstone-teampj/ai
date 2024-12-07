@@ -1,4 +1,3 @@
-#from fastapi import FastAPI, HTTPException
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict
@@ -6,7 +5,6 @@ import pandas as pd
 from surprise import Dataset, Reader, KNNBasic
 
 # FastAPI 인스턴스 생성
-#recommend_app = FastAPI()
 recommend_router = APIRouter()
 
 # 입력 데이터 모델 정의
@@ -20,7 +18,7 @@ class Store(BaseModel):
     cleanliness: int
 
 class RecommendRequest(BaseModel):
-    preferType: str
+    preferType: List[str]  # 단일 문자열에서 리스트로 변경
     preferCategories: str
     storelist: List[Store]
 
@@ -31,13 +29,15 @@ class RecommendResponse(BaseModel):
 @recommend_router.post("/recommend", response_model=RecommendResponse)
 def recommend_stores(request: RecommendRequest):
     """
-    사용자의 선호 유형(prefer_type)과 평가 항목(prefer_categories)을 기준으로
+    사용자의 선호 유형(preferType)과 평가 항목(preferCategories)을 기준으로
     상위 5개 매장을 추천합니다.
     """
     # 1. 데이터 전처리
     try:
         store_data = pd.DataFrame([store.dict() for store in request.storelist])
-        filtered_stores = store_data[store_data['storeType'] == request.preferType]
+        
+        # 여러 `preferType` 필터 적용
+        filtered_stores = store_data[store_data['storeType'].isin(request.preferType)]
 
         if filtered_stores.empty:
             raise HTTPException(status_code=404, detail="선호하는 매장 유형이 없습니다.")
